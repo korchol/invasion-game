@@ -1,42 +1,55 @@
 import pygame
 
 class Ship:
-    """Klasa do zarządzania statkiem"""
+    """Klasa przeznaczona do zarządzania statkiem"""
+
     def __init__(self, ai_game):
-        """Inicjalizacja statku i jego położenia"""
+        """Inicjalizacja właściwości i zasobów statku"""
+        super().__init__()
+
+        #Zasoby z gry
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
 
-        #Wyświetlanie modelu oraz lokalizacja modelu
+        #Obraz oraz obszar statku
         self.forward = pygame.image.load('images/statek.bmp')
         self.right = pygame.image.load('images/statek_prawo.bmp')
         self.left = pygame.image.load('images/statek_lewo.bmp')
         self.rect = self.forward.get_rect()
+
+        #Obraz oraz obszar płomienia
         self.medium = pygame.image.load('images/flame.bmp')
         self.huge = pygame.image.load('images/flame_huge.bmp')
         self.small = pygame.image.load('images/flame_small.bmp')
         self.rect_flame = self.medium.get_rect()
 
-        #Położenie statku podpisuje jako środek dół EKRANU gry
+        #Początkowe położenie statku
         self.rect.midbottom = self.screen_rect.midbottom
         self.rect_flame.midbottom = self.rect.midbottom
 
-        #Położenie poziome statku jako float
+        #Położenie statku jako float aby zwiększyć dokładność
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
 
-        #Opcje poruszania się statku
+        #Poruszanie się statku po inicjacji
         self.moving_right = False
         self.moving_left = False
         self.moving_up = False
         self.moving_down = False
 
+
     def update_position(self):
+        """Uaktualnienie położenia statku"""
+
+        #Domyślnie
         self.image = self.forward
         self.flame = self.medium
+
+        #Płomień przypięty do statku
         self.rect_flame.midbottom = self.rect.midbottom
-        """Uaktualnienie położenia statku"""
+
+        #Warunki oraz starowanie statkiem po ekranie
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += self.settings.ship_speed
             self.image = self.right
@@ -50,10 +63,15 @@ class Ship:
             self.y += self.settings.ship_speed
             self.flame = self.small
 
+        #Przypisywanie zaktualizowanych koordynatów do rzeczywistej pozycji statku
         self.rect.x = self.x
         self.rect.y = self.y
     
+
     def print_ship(self):
         """Wyświetlanie modelu w lokalizacji modelu"""
+
+        #Wyświtlanie statku
         self.screen.blit(self.image, self.rect)
+        #Wyświtlanie płomienia
         self.screen.blit(self.flame, self.rect_flame)
