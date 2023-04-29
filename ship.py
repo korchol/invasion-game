@@ -39,17 +39,18 @@ class Ship:
         self.moving_down = False
 
 
-    def update_position(self):
+    def update(self):
         """Uaktualnienie położenia statku"""
 
-        #Domyślnie
+        #Ustawianie forward i medium jako domyślna tekstura
         self.image = self.forward
         self.flame = self.medium
 
         #Płomień przypięty do statku
         self.rect_flame.midbottom = self.rect.midbottom
 
-        #Warunki oraz starowanie statkiem po ekranie
+        #Starowanie statkiem po ekranie i wybieranie odpowiedniej tektury
+        #Warunki gwarantują, że statek nie wyleci za ekran
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += self.settings.ship_speed
             self.image = self.right
@@ -69,9 +70,9 @@ class Ship:
     
 
     def print_ship(self):
-        """Wyświetlanie modelu w lokalizacji modelu"""
-
-        #Wyświtlanie statku
+        """Metoda generująca statek"""
+        
+        #Generowanie statku
         self.screen.blit(self.image, self.rect)
-        #Wyświtlanie płomienia
+        #Generowanie płomienia
         self.screen.blit(self.flame, self.rect_flame)

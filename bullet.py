@@ -23,15 +23,15 @@ class Bullet(Sprite):
 
 
     def update(self):
-        """Metoda przesuwająca pocisk w góre ekranu o 1 bullet speed"""
+        """Metoda przesuwająca pocisk w góre ekranu o 1 bullet_speed"""
 
-        #Warunki przemieszczania
+        #Przesunięcie pocisku o 1 bullet_speed
         self.y -= self.settings.bullet_speed
         #Aktualizacja położenia y
         self.rect.y = self.y
 
 
-    def shot_bullet(self):
+    def print_bullet(self):
         """Metoda generująca pocisk"""
         
         #Generowanie pojedynczego pocisku

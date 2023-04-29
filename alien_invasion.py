@@ -31,7 +31,7 @@ class AlienInvasion:
 
         while True:
             self._check_events()
-            self.ship.update_position()
+            self._update_ship()
             self._update_bullets()
             self._update_fleet()
             self._update_screen()
@@ -44,7 +44,7 @@ class AlienInvasion:
         self.screen.blit(self.settings.background, self.settings.rect)
         #Pociski na tło
         for bullet in self.bullets.sprites():
-            bullet.shot_bullet()
+            bullet.print_bullet()
         #Obczy na pociski na tło
         for alien in self.aliens.sprites():
             alien.print_alien()
@@ -70,6 +70,7 @@ class AlienInvasion:
     def _key_down_events(self, event):
         """Reakcja na wydarzenie typu: wciśnięty klawisz"""
 
+        #Poruszanie prawo, lewo, góra, dół
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
@@ -78,8 +79,11 @@ class AlienInvasion:
             self.ship.moving_up = True
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = True
+        #Dodanie nowego pocisku do grupy
         elif event.key == pygame.K_SPACE:
-            self._shot()
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+        #Wyłączenie gry
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -87,6 +91,7 @@ class AlienInvasion:
     def _key_up_events(self, event):
         """Reakcja na wydarzenie typu: zwolniony klawisz"""
 
+        #Zatrzymywanie poruszania prawo, lewo, góra, dół
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
@@ -96,18 +101,11 @@ class AlienInvasion:
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = False  
 
-    
-    def _shot(self):
-        """Utworzenie egzemplarza pocisku oraz dodanie go do grupy istniejących"""
-
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
-
 
     def _update_bullets(self):
-        """Aktualizowanie grupy pocisków"""
+        """Zarządzanie grupą istniejących pocisków"""
 
-        #Update położenia pocisków
+        #PRzesunięcie pocisku o 1 jednostkę prędkości
         self.bullets.update()
         #Usuwanie pocisku poza ekranem
         for bullet in self.bullets:
@@ -120,18 +118,29 @@ class AlienInvasion:
 
 
     def _update_fleet(self):
-        """Z"""
+        """Zarządzanie oraz dodawanie obcych do grupy"""
+
+        #Przesunięcie obcego o 1 jednostkę prędkości
+        self.aliens.update()
+
+        #Dodawanie obcych, do momentu osiągnięcia odpowiedniego rozmiaru floty
         if len(self.aliens) < 10:
             new_alien = Alien(self)
             self.aliens.add(new_alien)
 
-        self.aliens.update()
+        #Usuwanie obcych którzy dotarli do końca ekranu
         for alien in self.aliens:
             if alien.rect.bottom > 800:
                 self.aliens.remove(alien)
 
+    
+    def _update_ship(self):
+        self.ship.update()
+
 
 if __name__ == '__main__':
+
     #Utworzenie egzemplarza gry i wywołanie metody rozpoczynającej pętlę gry
     ai = AlienInvasion()
+    #Wywołanie egzemplarza gry
     ai.run_game()

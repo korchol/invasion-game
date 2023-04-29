@@ -28,28 +28,40 @@ class Alien(Sprite):
         self.y = float(self.rect.y)
 
 
+    def update(self):
+        """Metoda przesuwająca obcego w dół ekranu o 1 alien_speed"""
+
+        #Przesunięcie obcego o 1 alien_speed
+        self.y += self.alien_speed
+        #Aktualizacja położenia y
+        self.rect.y = self.y
+
+
     def print_alien(self):
+        """Metoda generująca pocisk"""
+        
+        #Generowanie pojedynczego obcego
         self.screen.blit(self.image, self.rect)
 
 
     def random_spawn(self):
+        """Metoda wybiera odpowiednio losową lokalizacje dla egzemplarza obcego"""
+
+        #Pierwsza próba generowania losowej lokalizacji
         self.rect.x = random.randint(1, self.alien_border)
         self.rect.y = float(random.randint(-500 , 0))
+
+        #Jeżeli lokalizacja jest zajęta przez inny egzemplarz obcego szukamy wolnego do skutku
         while self.colision(self.aliens):
             self.rect.x = random.randint(1, self.alien_border)
             self.rect.y = random.randint(-500 , 0)
 
 
     def colision(self, aliens):
+            
             for alien in aliens:
                 if self.rect.colliderect(alien.rect):
                     return True
-    
-
-    def update(self):
-        self.y += self.alien_speed
-        self.rect.y = self.y
-    
 
     # def hit(self):
     #     """Metoda sprawdzająca czy pocisk został napotkany"""

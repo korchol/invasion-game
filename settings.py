@@ -23,7 +23,7 @@ class Settings:
             self.fullscreen = pygame.FULLSCREEN
 
         #Ustawienia dynamiki (szybkość pocisku, szybkość statku)
-        self.bullet_speed = 0.5
+        self.bullet_speed = 5
         self.ship_speed = 1.2
 
 
