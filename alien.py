@@ -18,14 +18,23 @@ class Alien(Sprite):
         #Obraz oraz obszar obcego
         self.image = pygame.image.load('images/alien1.bmp')
         self.rect = self.image.get_rect()
+        self.boom_image = pygame.image.load('images/boom.bmp')
 
         #Prędkość obcego oraz jego i ustawienia spawnu (granica, losowość)
         self.alien_speed = 0.5
         self.alien_border = 1200 - self.rect.width
-        self.random_spawn()
+        self.random_spawn(self.aliens)
 
         #Wartość położenia 'y' jako float aby zwiększyć dokładność
         self.y = float(self.rect.y)
+
+        #Punkty zdrowia oraz status życia
+        self.health_points = 2
+        self.live = True
+
+        self.collision = False
+
+        self.time_dead = 0
 
 
     def update(self):
@@ -38,37 +47,40 @@ class Alien(Sprite):
 
 
     def print_alien(self):
-        """Metoda generująca pocisk"""
+        """Metoda generująca obcego"""
         
         #Generowanie pojedynczego obcego
         self.screen.blit(self.image, self.rect)
 
 
-    def random_spawn(self):
-        """Metoda wybiera odpowiednio losową lokalizacje dla egzemplarza obcego"""
+    def random_spawn(self, aliens):
+        """Metoda rekurencyjnie szuka wolnego miejsca na mapie"""
 
-        #Pierwsza próba generowania losowej lokalizacji
+        #Wybór nowego losowego miejsca
         self.rect.x = random.randint(1, self.alien_border)
         self.rect.y = float(random.randint(-500 , 0))
 
-        #Jeżeli lokalizacja jest zajęta przez inny egzemplarz obcego szukamy wolnego do skutku
-        while self.colision(self.aliens):
-            self.rect.x = random.randint(1, self.alien_border)
-            self.rect.y = random.randint(-500 , 0)
+        #Sprawdzenie czy miejsce jest wolne
+        for alien in aliens:
+            if self.rect.colliderect(alien.rect):
+                #Jeżeli nie, metoda wywłuje się do skutku
+                self.random_spawn(self.aliens)
 
+    
+    def alien_boom(self):
+        self.image = self.boom_image
+        self.screen.blit(self.image, self.rect)
+        
 
-    def colision(self, aliens):
             
-            for alien in aliens:
-                if self.rect.colliderect(alien.rect):
-                    return True
 
-    # def hit(self):
-    #     """Metoda sprawdzająca czy pocisk został napotkany"""
 
-    #     #Usuwanie konkretnego pocisku po kontakcie z obcym
-    #     for bullet in self.bullets:
-    #         if self.rect.colliderect(bullet.rect):
-    #             self.aliens.remove(bullet)
-    #             return True
-
+    def hit(self):
+        """Metoda sprawdzająca czy obcy został trafiony"""
+        #Status 'zabitego' jeżeli obcy został trafiony
+        for bullet in self.bullets:
+            if self.rect.colliderect(bullet.rect):
+                self.health_points -= 1
+                self.bullets.remove(bullet)
+                if self.health_points == 0:
+                    self.live = False

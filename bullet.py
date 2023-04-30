@@ -21,6 +21,8 @@ class Bullet(Sprite):
         #Wartość położenia 'y' jako float aby zwiększyć dokładność
         self.y = float(self.rect.y)
 
+        self.live = True
+
 
     def update(self):
         """Metoda przesuwająca pocisk w góre ekranu o 1 bullet_speed"""
@@ -44,5 +46,4 @@ class Bullet(Sprite):
         #Usuwanie konkretnego obcego po kontakcie z pociskiem
         for alien in self.aliens:
             if self.rect.colliderect(alien.rect):
-                self.aliens.remove(alien)
-                return True
+                self.live = False

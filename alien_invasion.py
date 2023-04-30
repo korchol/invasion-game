@@ -5,6 +5,7 @@ from settings import Settings
 from bullet import Bullet
 from alien import Alien
 
+
 class AlienInvasion:
     """Zarządzanie zasobami i sposób działania gry"""
 
@@ -24,6 +25,9 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         #Grupa na wygenerowanych obcych
         self.aliens = pygame.sprite.Group()
+        #
+        self.hit = False
+        self.score = 0
 
 
     def run_game(self):
@@ -32,8 +36,9 @@ class AlienInvasion:
         while True:
             self._check_events()
             self._update_ship()
-            self._update_bullets()
+            self._detect_hit()
             self._update_fleet()
+            self._update_bullets()
             self._update_screen()
 
 
@@ -45,11 +50,13 @@ class AlienInvasion:
         #Pociski na tło
         for bullet in self.bullets.sprites():
             bullet.print_bullet()
-        #Obczy na pociski na tło
+        #Obcy na pociski na tło
         for alien in self.aliens.sprites():
             alien.print_alien()
         #Statek na obcych na pociski na tło
         self.ship.print_ship()
+        #Pasek zdrowia na statek na obcych na pociski na tło
+        self.ship.print_health(self.ship.total_health, self.ship.left_health)
 
         #Wyświetlenie kompozycji
         pygame.display.flip()
@@ -105,26 +112,22 @@ class AlienInvasion:
     def _update_bullets(self):
         """Zarządzanie grupą istniejących pocisków"""
 
-        #PRzesunięcie pocisku o 1 jednostkę prędkości
+        #Przesunięcie pocisku o 1 jednostkę prędkości
         self.bullets.update()
         #Usuwanie pocisku poza ekranem
         for bullet in self.bullets:
             if bullet.rect.bottom < 0:
                 self.bullets.remove(bullet)
-        #Usuwanie zetkniętych pocisków oraz obcych
-        for bullet in self.bullets:
-            if bullet.hit():
-                self.bullets.remove(bullet)
 
 
     def _update_fleet(self):
-        """Zarządzanie oraz dodawanie obcych do grupy"""
+        """Zarządzanie grupą istniejących obcych oraz jej formowanie"""
 
         #Przesunięcie obcego o 1 jednostkę prędkości
         self.aliens.update()
 
         #Dodawanie obcych, do momentu osiągnięcia odpowiedniego rozmiaru floty
-        if len(self.aliens) < 10:
+        if len(self.aliens) < 30:
             new_alien = Alien(self)
             self.aliens.add(new_alien)
 
@@ -132,10 +135,28 @@ class AlienInvasion:
         for alien in self.aliens:
             if alien.rect.bottom > 800:
                 self.aliens.remove(alien)
+        for alien in self.aliens:
+            if alien.live == False:
+                alien.alien_boom()
+                alien.time_dead += 1
+                if alien.time_dead > 100:
+                    self.aliens.remove(alien)
+                    self.score += 1
+                    print(f'{self.score}')
 
-    
+
+    def _detect_hit(self):
+        """Wykrywanie oraz zarządzanie zderzeniami"""
+        for alien in self.aliens:
+            alien.hit()
+            if self.ship.rect.colliderect(alien.rect):
+                self.ship.left_health -= 1
+                self.aliens.remove(alien)
+
+
     def _update_ship(self):
         self.ship.update()
+
 
 
 if __name__ == '__main__':
