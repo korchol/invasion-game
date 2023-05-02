@@ -21,7 +21,7 @@ class Alien(Sprite):
         self.boom_image = pygame.image.load('images/boom.bmp')
 
         #Prędkość obcego oraz jego i ustawienia spawnu (granica, losowość)
-        self.alien_speed = 0.5
+        self.alien_speed = ai_game.level.alien_speed
         self.alien_border = 1200 - self.rect.width
         self.random_spawn(self.aliens)
 
@@ -29,7 +29,7 @@ class Alien(Sprite):
         self.y = float(self.rect.y)
 
         #Punkty zdrowia oraz status życia
-        self.health_points = 2
+        self.health_points = ai_game.level.alien_health
         self.live = True
 
         self.collision = False
@@ -37,13 +37,13 @@ class Alien(Sprite):
         self.time_dead = 0
 
 
-    def update(self):
-        """Metoda przesuwająca obcego w dół ekranu o 1 alien_speed"""
-
+    def update(self, ai_game):
+        """Metoda odpowiedzialna za właściwości obcego"""
         #Przesunięcie obcego o 1 alien_speed
-        self.y += self.alien_speed
+        self.y += ai_game.level.alien_speed
         #Aktualizacja położenia y
         self.rect.y = self.y
+
 
 
     def print_alien(self):
@@ -70,9 +70,6 @@ class Alien(Sprite):
     def alien_boom(self):
         self.image = self.boom_image
         self.screen.blit(self.image, self.rect)
-        
-
-            
 
 
     def hit(self):

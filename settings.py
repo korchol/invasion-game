@@ -25,6 +25,7 @@ class Settings:
         #Ustawienia dynamiki (szybkość pocisku, szybkość statku)
         self.bullet_speed = 5
         self.ship_speed = 1.2
+        self.ship_health = 6
 
 
 

@@ -4,7 +4,7 @@ from ship import Ship
 from settings import Settings
 from bullet import Bullet
 from alien import Alien
-
+from level import Level
 
 class AlienInvasion:
     """Zarządzanie zasobami i sposób działania gry"""
@@ -25,21 +25,24 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         #Grupa na wygenerowanych obcych
         self.aliens = pygame.sprite.Group()
-        #
-        self.hit = False
-        self.score = 0
+        #Utworzenie egzemplarza levela
+        self.level = Level(self)
+        #Innicjalizacja zmiennej przerwy
+        self.fleet_cd = 0
 
 
     def run_game(self):
         """Główna pętla gry"""
 
         while True:
+            self._update_level()
             self._check_events()
             self._update_ship()
             self._detect_hit()
             self._update_fleet()
             self._update_bullets()
             self._update_screen()
+
 
 
     def _update_screen(self):
@@ -90,6 +93,9 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
+        #Gra od nowa
+        elif event.key == pygame.K_r:
+            self.level.reset_level()
         #Wyłączenie gry
         elif event.key == pygame.K_q:
             sys.exit()
@@ -109,6 +115,15 @@ class AlienInvasion:
             self.ship.moving_down = False  
 
 
+    def _update_level(self):
+        """Sprawdzanie wyniku i aktualizowanie egzemplarza poziomu"""
+
+        if self.level.score == 5 and self.level.number != 1:
+            self.level.level_1()
+        elif self.level.score == 10 and self.level.number != 2:
+            self.level.level_2()
+
+
     def _update_bullets(self):
         """Zarządzanie grupą istniejących pocisków"""
 
@@ -123,30 +138,38 @@ class AlienInvasion:
     def _update_fleet(self):
         """Zarządzanie grupą istniejących obcych oraz jej formowanie"""
 
-        #Przesunięcie obcego o 1 jednostkę prędkości
-        self.aliens.update()
+        #Aktualizowanie właściwości obcego
+        self.aliens.update(self)
 
-        #Dodawanie obcych, do momentu osiągnięcia odpowiedniego rozmiaru floty
-        if len(self.aliens) < 30:
-            new_alien = Alien(self)
-            self.aliens.add(new_alien)
+        #Dodawanie obcych w odstępach fleet_cd, do momentu osiągnięcia odpowiedniego rozmiaru floty
+        if self.fleet_cd < 100:
+            self.fleet_cd += 1
+        else:
+            if len(self.aliens) < self.level.fleet_size:
+                new_alien = Alien(self)
+                self.aliens.add(new_alien)
+                self.fleet_cd = 0
+            self.fleet_cd = 0
 
         #Usuwanie obcych którzy dotarli do końca ekranu
         for alien in self.aliens:
             if alien.rect.bottom > 800:
                 self.aliens.remove(alien)
+        
+        #Wybuchanie trafionych obcych
         for alien in self.aliens:
             if alien.live == False:
                 alien.alien_boom()
                 alien.time_dead += 1
                 if alien.time_dead > 100:
                     self.aliens.remove(alien)
-                    self.score += 1
-                    print(f'{self.score}')
+                    self.level.score += 1
+                    print(f'{self.level.score}')
 
 
     def _detect_hit(self):
         """Wykrywanie oraz zarządzanie zderzeniami"""
+
         for alien in self.aliens:
             alien.hit()
             if self.ship.rect.colliderect(alien.rect):
