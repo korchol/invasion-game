@@ -5,6 +5,8 @@ from settings import Settings
 from bullet import Bullet
 from alien import Alien
 from level import Level
+from scoreboard import Scoreboard
+from menu import Menu
 
 class AlienInvasion:
     """Zarządzanie zasobami i sposób działania gry"""
@@ -27,39 +29,53 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
         #Utworzenie egzemplarza levela
         self.level = Level(self)
+        #
+        self.scoreboard = Scoreboard(self)
         #Innicjalizacja zmiennej przerwy
         self.fleet_cd = 0
+        #
+        self.menu = Menu(self)
+        #
+        self.game_active = False
+
+        self.time_dead = 0
+
 
 
     def run_game(self):
         """Główna pętla gry"""
 
         while True:
-            self._update_level()
             self._check_events()
-            self._update_ship()
-            self._detect_hit()
-            self._update_fleet()
-            self._update_bullets()
+            if self.game_active:
+                self._update_level()
+                self._update_ship()
+                self._detect_hit()
+                self._update_fleet()
+                self._update_bullets()
             self._update_screen()
-
 
 
     def _update_screen(self):
         """Zarządzanie oraz wyświetlanie obrazów gry"""
 
-        #Tło
-        self.screen.blit(self.settings.background, self.settings.rect)
-        #Pociski na tło
-        for bullet in self.bullets.sprites():
-            bullet.print_bullet()
-        #Obcy na pociski na tło
-        for alien in self.aliens.sprites():
-            alien.print_alien()
-        #Statek na obcych na pociski na tło
-        self.ship.print_ship()
-        #Pasek zdrowia na statek na obcych na pociski na tło
-        self.ship.print_health(self.ship.total_health, self.ship.left_health)
+        self.menu.update_menu()
+        if self.game_active:
+            #Tło
+            self.screen.blit(self.settings.background, self.settings.rect)
+            #Pociski na tło
+            for bullet in self.bullets.sprites():
+                bullet.print_bullet()
+            #Obcy na pociski na tło
+            for alien in self.aliens.sprites():
+                alien.print_alien()
+            #Statek na obcych na pociski na tło
+            self.ship.print_ship()
+            #Pasek zdrowia na statek na obcych na pociski na tło
+            self.scoreboard.print_health(self.scoreboard.total_health, self.scoreboard.left_health)
+            self.scoreboard.print_score()
+        
+        
 
         #Wyświetlenie kompozycji
         pygame.display.flip()
@@ -87,18 +103,22 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_UP:
             self.ship.moving_up = True
+            if self.game_active == False:
+                self.menu.button_up()
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = True
+            if self.game_active == False:
+                self.menu.button_down()
+        elif event.key == pygame.K_ESCAPE:
+            self.game_active = False
         #Dodanie nowego pocisku do grupy
         elif event.key == pygame.K_SPACE:
-            new_bullet = Bullet(self)
-            self.bullets.add(new_bullet)
-        #Gra od nowa
-        elif event.key == pygame.K_r:
-            self.level.reset_level()
-        #Wyłączenie gry
-        elif event.key == pygame.K_q:
-            sys.exit()
+            if self.game_active:
+                new_bullet = Bullet(self)
+                self.bullets.add(new_bullet)
+            else:
+                self.menu.button_click(self)
+            
 
 
     def _key_up_events(self, event):
@@ -117,11 +137,24 @@ class AlienInvasion:
 
     def _update_level(self):
         """Sprawdzanie wyniku i aktualizowanie egzemplarza poziomu"""
-
-        if self.level.score == 5 and self.level.number != 1:
+        
+        if self.level.number == 0:
+            self.level.level_0()
+        elif self.level.score == 10 and self.level.number == 1:
             self.level.level_1()
-        elif self.level.score == 10 and self.level.number != 2:
+            self.scoreboard.prep_stage()
+        elif self.level.score == 20 and self.level.number == 2:
             self.level.level_2()
+            self.scoreboard.prep_stage()
+        elif self.level.score == 30 and self.level.number == 3:
+            self.level.level_3()
+            self.scoreboard.prep_stage()
+        elif self.level.score == 40 and self.level.number == 4:
+            self.level.level_4()
+            self.scoreboard.prep_stage()
+        # elif self.level.score == 50 and self.level.number == 4:
+        #     self.level.level_5()
+        #     self.scoreboard.prep_stage()
 
 
     def _update_bullets(self):
@@ -164,7 +197,7 @@ class AlienInvasion:
                 if alien.time_dead > 100:
                     self.aliens.remove(alien)
                     self.level.score += 1
-                    print(f'{self.level.score}')
+                    self.scoreboard.prep_score()
 
 
     def _detect_hit(self):
@@ -173,7 +206,7 @@ class AlienInvasion:
         for alien in self.aliens:
             alien.hit()
             if self.ship.rect.colliderect(alien.rect):
-                self.ship.left_health -= 1
+                self.scoreboard.left_health -= 1
                 self.aliens.remove(alien)
 
 

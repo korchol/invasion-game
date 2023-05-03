@@ -28,14 +28,6 @@ class Ship:
         self.rect.midbottom = self.screen_rect.midbottom
         self.rect_flame.midbottom = self.rect.midbottom
 
-        #Zdrowie statku
-        self.total_health = self.settings.ship_health
-        self.left_health = self.total_health
-        self.heart = pygame.image.load('images/heart.bmp')
-        self.heart_empty = pygame.image.load('images/heart_empty.bmp')
-        self.rect_heart = self.heart.get_rect()
-        self.rect_heart.topleft = self.screen_rect.topleft
-
         #Położenie statku jako float aby zwiększyć dokładność
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
@@ -78,20 +70,7 @@ class Ship:
         self.rect.y = self.y
     
 
-    def print_health(self, _max, left):
-        """Metoda wyświetlająca wskazaną ilość zdrowia"""
 
-        #Wyświetlanie maxymalnego zdrowia
-        for _ in range(_max):
-            self.screen.blit(self.heart_empty, self.rect_heart)
-            self.rect_heart.x += (self.rect_heart.width)
-        self.rect_heart.topleft = self.screen_rect.topleft
-        
-        #Wyświetlanie minimalnego zdrowia
-        for _ in range(left):
-            self.screen.blit(self.heart, self.rect_heart)
-            self.rect_heart.x += (self.rect_heart.width)
-        self.rect_heart.topleft = self.screen_rect.topleft
 
 
     def print_ship(self):
