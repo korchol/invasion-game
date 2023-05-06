@@ -39,7 +39,6 @@ class Ship:
         self.moving_down = False
 
 
-
     def update(self):
         """Uaktualnienie położenia statku"""
 
@@ -68,9 +67,6 @@ class Ship:
         #Przypisywanie zaktualizowanych koordynatów do rzeczywistej pozycji statku
         self.rect.x = self.x
         self.rect.y = self.y
-    
-
-
 
 
     def print_ship(self):

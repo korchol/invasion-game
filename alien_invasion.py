@@ -5,7 +5,7 @@ from settings import Settings
 from bullet import Bullet
 from alien import Alien
 from level import Level
-from scoreboard import Scoreboard
+from interface import Interface
 from menu import Menu
 
 class AlienInvasion:
@@ -29,16 +29,16 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
         #Utworzenie egzemplarza levela
         self.level = Level(self)
-        #
-        self.scoreboard = Scoreboard(self)
+        #Utworzenie egzemplarza tablicy
+        self.interface = Interface(self)
         #Innicjalizacja zmiennej przerwy
         self.fleet_cd = 0
-        #
+        #Utworzenie egzemplarza menu
         self.menu = Menu(self)
-        #
+        #Status aktywności rozgrywki
         self.game_active = False
 
-        self.time_dead = 0
+
 
 
 
@@ -59,8 +59,11 @@ class AlienInvasion:
     def _update_screen(self):
         """Zarządzanie oraz wyświetlanie obrazów gry"""
 
-        self.menu.update_menu()
-        if self.game_active:
+        #Nałożenie warstw menu
+        if self.game_active == False:
+            self.menu.update_menu()
+        #Jeżeli gra aktywna nałożenie warstw gry
+        else:
             #Tło
             self.screen.blit(self.settings.background, self.settings.rect)
             #Pociski na tło
@@ -72,11 +75,9 @@ class AlienInvasion:
             #Statek na obcych na pociski na tło
             self.ship.print_ship()
             #Pasek zdrowia na statek na obcych na pociski na tło
-            self.scoreboard.print_health(self.scoreboard.total_health, self.scoreboard.left_health)
-            self.scoreboard.print_score()
+            self.interface.print_health(self.interface.total_health, self.interface.left_health)
+            self.interface.print_score()
         
-        
-
         #Wyświetlenie kompozycji
         pygame.display.flip()
 
@@ -109,6 +110,7 @@ class AlienInvasion:
             self.ship.moving_down = True
             if self.game_active == False:
                 self.menu.button_down()
+        #Wyjście do menu
         elif event.key == pygame.K_ESCAPE:
             self.game_active = False
         #Dodanie nowego pocisku do grupy
@@ -142,19 +144,19 @@ class AlienInvasion:
             self.level.level_0()
         elif self.level.score == 10 and self.level.number == 1:
             self.level.level_1()
-            self.scoreboard.prep_stage()
+            self.interface.prep_stage()
         elif self.level.score == 20 and self.level.number == 2:
             self.level.level_2()
-            self.scoreboard.prep_stage()
+            self.interface.prep_stage()
         elif self.level.score == 30 and self.level.number == 3:
             self.level.level_3()
-            self.scoreboard.prep_stage()
+            self.interface.prep_stage()
         elif self.level.score == 40 and self.level.number == 4:
             self.level.level_4()
-            self.scoreboard.prep_stage()
+            self.interface.prep_stage()
         # elif self.level.score == 50 and self.level.number == 4:
         #     self.level.level_5()
-        #     self.scoreboard.prep_stage()
+        #     self.interface.prep_stage()
 
 
     def _update_bullets(self):
@@ -197,16 +199,17 @@ class AlienInvasion:
                 if alien.time_dead > 100:
                     self.aliens.remove(alien)
                     self.level.score += 1
-                    self.scoreboard.prep_score()
+                    self.interface.prep_score()
 
 
     def _detect_hit(self):
         """Wykrywanie oraz zarządzanie zderzeniami"""
 
+        #Zderzenie obcego z pociskiem lub statkiem
         for alien in self.aliens:
             alien.hit()
             if self.ship.rect.colliderect(alien.rect):
-                self.scoreboard.left_health -= 1
+                self.interface.left_health -= 1
                 self.aliens.remove(alien)
 
 

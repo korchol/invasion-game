@@ -1,7 +1,10 @@
 import pygame.font
 
-class Scoreboard:
+class Interface:
+    """Klasa przeznaczona do zarządzania interfejsem"""
+
     def __init__(self, ai_game):
+        """Inicjalizacja właściwości i zasobów interfejsu"""
 
         #Pobieranie zmiennych z głównego pliku
         self.screen = ai_game.screen
@@ -80,7 +83,7 @@ class Scoreboard:
     def print_health(self, _max, left):
         """Metoda wyświetlająca wskazaną ilość zdrowia"""
 
-        #Wyświetlanie maxymalnego zdrowia
+        #Wyświetlanie maksymalnego zdrowia
         for _ in range(_max):
             self.screen.blit(self.heart_empty, self.rect_heart)
             self.rect_heart.x += (self.rect_heart.width)
